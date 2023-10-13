@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 定义映射文件的命名空间，与对应的 Java Mapper 类相关联 -->
+<mapper namespace="com.example.demo.mapper.homeMapper">
+    <!-- 查询符合状态的帖子 -->
+    <select id="queryHome" resultType="homepage">
+        select * from homepage
+        <where>
+            <if test="status != null">
+                and status = #{status}
+            </if>
+        </where>
+    </select>
+
+    <!-- 查询返回的帖子的 homeId -->
+    <select id="queryReturnByName" resultType="java.lang.Long">
+        select homeId from returnHome
+    </select>
+
+    <!-- 根据用户名查询用户浏览过的帖子 ID -->
+    <select id="queryBrowsinghistoryByName" resultType="java.lang.Long">
+        select browsing_home_id from browsinghistory where browsing_user_name = #{userName}
+    </select>
+
+    <!-- 查询一组 homeId 对应的帖子并按照浏览记录的创建时间降序排列 -->
+    <select id="queryHomeByIds" resultType="com.example.demo.entity.homepage">
+        select * from homepage
+        left join browsinghistory on browsinghistory.browsing_home_id = homepage.id
+        where homepage.id in
+        <foreach collection="homeIds" close=")" open="(" item="item" separator=",">
+            #{item}
+        </foreach>
+        order by browsinghistory.browsing_create_time desc
+    </select>
+
+    <!-- 查询特定用户和帖子的浏览记录 -->
+    <select id="queryBrowseRecording" resultType="com.example.demo.entity.browsinghistory">
+        select * from browsinghistory
+        where browsing_user_name = #{browsingUserName} and browsing_home_id = #{browsingHomeId}
+    </select>
+
+    <!-- 查询用户浏览过的帖子的类型及对应的阅读次数，按阅读次数降序排列 -->
+    <select id="queryBrowseRecordingByuserName" resultType="com.example.demo.entity.homepage">
+        SELECT homepage.pub_type, COUNT(homepage.pub_type) AS readCount
+        FROM browsinghistory
+                 left join homepage on browsinghistory.browsing_home_id = homepage.id
+        GROUP BY homepage.pub_type
+        ORDER BY readCount DESC;
+    </select>
+
+    <!-- 根据 pubType 列表排除特定类型的帖子 -->
+    <select id="queryByNotType" resultType="com.example.demo.entity.homepage">
+        select * from homepage
+        where pub_type not in
+        <foreach collection="pubTypeList" separator="," item="item" open="(" close=")">
+            #{item}
+        </foreach>
+    </select>
+
+    <!-- 查询帖子，根据状态过滤，并按照阅读次数降序排列 -->
+    <select id="queryHomeByOrderByReadCount" resultType="com.example.demo.entity.homepage">
+        select * from homepage
+        where status = #{status}
+        order by read_count desc
+    </select>
+
+    <!-- 根据 pubType 列表获取特定类型的帖子 -->
+    <select id="queryByPubType" resultType="com.example.demo.entity.homepage">
+        select * from homepage
+        where pub_type in
+        <foreach collection="pubTypeList" open="(" close=")" item="item" separator=",">
+            #{item}
+        </foreach>
+    </select>
+
+    <!-- 查询发布类型信息 -->
+    <select id="queryPublicationType" resultType="com.example.demo.entity.publicationtype">
+        select * from publicationtype
+    </select>
+
+    <!-- 插入新帖子 -->
+    <insert id="insertHome" parameterType="homepage">
+        insert into homepage
+        (title,content,pub_type,img_url,user_name,remind,`accessible`,status,create_time,read_count,like_count,collect_count)
+        values
+        (#{title},#{content},#{pubType},#{fileList},#{userName},#{remind},#{accessible},0,now(),0,0,0)
+    </insert>
+
+    <!-- 插入返回帖子记录 -->
+    <insert id="insertReturn">
+        insert into returnhome (homeId,user_name)  values
+        <foreach collection="hisHomeIds" separator="," item="item" >
+            (#{item},#{userName})
+        </foreach>
+    </insert>
+
+    <!-- 插入浏览记录 -->
+    <insert id="insertBrowsinghistory">
+        insert into browsinghistory(browsing_user_name,browsing_home_id,browsing_create_time) values
+        (#{browsingUserName},#{browsingHomeId},now())
+    </insert>
+
+    <!-- 更新浏览记录的时间 -->
+    <update id="updateBrowsinghistory">
+        update browsinghistory set browsing_create_time = now() where browsing_home_id = #{browsingHomeId}
+    </update>
+
+    <!-- 更新帖子的阅读次数 -->
+    <update id="updateReadCount">
+        update homepage
+        set read_count = read_count + 1
+        where id = #{browsingHomeId}
+    </update>
+</mapper>
