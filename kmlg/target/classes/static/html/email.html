@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <!-- 引入样式 -->
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+    <script src="/js/vue.js"></script>
+    <script src="/js/jquery-3.1.1.min.js"></script>
+    <!-- 引入组件库 -->
+    <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+</head>
+<body>
+<div id="login" class="login-one">
+    <el-container class="test">
+        <el-header></el-header>
+        <el-main>
+            <br><br><br><br>
+            <el-row>
+                <el-col :span="8">&nbsp;</el-col>
+                <el-col :span="8">
+                    <el-form label-width="80px" style="background-color: white;border-radius: 1%;max-width: 500px; opacity: 0.9;padding-left: 10px;padding-right: 10px;" >
+                        <br>
+
+                        <h1 align="center">邮箱登录</h1>
+
+                        <el-form-item label="" style="margin-top:40px;">
+                            <el-col :span="20">
+                                <el-input prefix-icon="el-icon-user" v-model="user.email" placeholder="请输入邮箱"></el-input>
+                            </el-col>
+                        </el-form-item>
+
+                        <el-form-item label="" :inline="true">
+                            <el-col :span="10">
+                                <el-input v-model="user.voCode" placeholder="请输入验证码"></el-input>
+                            </el-col>
+                            <el-col :span="9">
+                                <el-button type="primary" icon="el-icon-message" style="margin-left: 20px;margin-right: 20px;width: 80%;font-size: 0.8vw;"@click = "sendEmail">
+                                    点此发送
+                                </el-button>
+                            </el-col>
+                            <el-col :span="4">
+                                <el-button icon="el-icon-refresh-right" type="text"></el-button>
+                            </el-col>
+                        </el-form-item>
+
+                        <el-form-item  style="margin-top: 40px;">
+                            <el-col >
+                                <el-button type="primary" size="" icon="el-icon-user-solid"  @click="login" plain="true" style="width: 83%;margin-bottom: 0px;">登录</el-button>
+                            </el-col>
+                        </el-form-item>
+
+                        <el-form-item :inline="true">
+                            <el-col align="right">
+                                <el-link align="lift" type="success" @click="back">用户登录</el-link>
+                                <span>&nbsp;&nbsp;</span>
+                                <el-link type="primary" @click="">注册</el-link>
+                                <span>&nbsp;&nbsp;</span>
+                                <el-link type="danger">忘记密码？</el-link>
+                            </el-col>
+
+                        </el-form-item>
+
+                    </el-form>
+                </el-col>
+                <el-col :span="8">&nbsp;</el-col>
+            </el-row>
+
+
+        </el-main>
+    </el-container>
+</div>
+
+</body>
+
+<script>
+    //创建vue对象
+    new Vue({
+        el:"#login",//绑定html元素
+        data:{ //你需要操作的数据对象
+            user:{
+                email:"",
+                voCode:""
+            }
+        },
+        methods:{ //定义vue函数
+            back:function(){
+                window.location.href="/html/login.html";
+            },
+            sendEmail:function(){
+                $.ajax({
+                    type: "post",
+                    url:"/email/sendEmail/"+ this.user.email,
+                    success:function (data) {
+                        if(data.code == 500) {
+                            self.$message("获取失败");
+                        }
+                    }
+                })
+            },
+            login:function () {//登录函数
+                //记录vue对象
+                const self = this;
+                //发送ajax请求服务端
+                $.ajax({
+                    url:"/email/emailogin",//请求地址
+                    type:"post",//请求类型
+                    data:this.user.voCode,//请求参数
+                    success:function (data) {//请求响应回调函数
+                        if(data.code==500){
+                            alert(data.msg);
+                        }else{
+                            window.location.href = "/html/index.html"; //跳转到系统主页
+                        }
+
+                    }
+                })
+
+            }
+        }
+
+    })
+
+</script>
+<style>
+    html,body{
+        margin: 0;/*设置html,body元素的内边距为0，默认是15px*/
+        height: 100%;
+    }
+    .el-header {
+
+    }
+    .el-main {
+
+    }
+    .test{
+        height: 100%
+    }
+    .login-one{
+        background-color:#1c77ac;
+        background-image:url(../img/bj.jpg);
+        background-size: cover;
+        background-repeat:no-repeat;
+        overflow:hidden;
+        height: 100%;
+    }
+
+</style>
+</html>

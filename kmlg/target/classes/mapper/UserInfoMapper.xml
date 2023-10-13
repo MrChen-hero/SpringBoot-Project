@@ -1,0 +1,16 @@
+<!-- UserInfoMapper.xml -->
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hqyj.dao.UserInfoDao">
+    <!-- 其他映射配置 -->
+
+    <update id="updatePasswordByEmail">
+    UPDATE user_info
+    SET user_pwd = #{password}
+    WHERE user_email = #{email}
+</update>
+    <select id="getUserByEmail" resultType="com.hqyj.pojo.UserInfo">
+    SELECT * FROM user_info
+    WHERE user_email = #{email}
+</select>
+</mapper>

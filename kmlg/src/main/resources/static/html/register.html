@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <!-- 引入样式 -->
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+    <script src="/js/vue.js"></script>
+    <script src="/js/jquery-3.1.1.min.js"></script>
+    <!-- 引入组件库 -->
+    <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+</head>
+<body>
+<div id="register">
+    <el-container class="test">
+        <br><br>
+        <el-main>
+            <el-row>
+                <el-col :span="8">&nbsp;</el-col>
+                <el-col :span="8">
+                    <el-form :model="user" :rules="rules" ref="userForm" style="background-color: white;border-radius: 1%;min-width: 500px; opacity: 0.9;padding-left: 10px;padding-right: 10px;">
+                        <br>
+                        <h1 align="center">用户注册</h1>
+                        <el-form-item label="用户名" prop="userName" style="margin: 20px;">
+                            <el-col :span="24" align="center">
+                                <el-input v-model="user.userName" placeholder="请输入用户名"></el-input>
+                            </el-col>
+                        </el-form-item>
+
+                        <el-form-item label="设置密码" prop="userPwd" style="margin: 20px;">
+                            <el-col :span="24" align="center">
+                                <el-input type="password" v-model="user.userPwd" placeholder="请输入密码"></el-input>
+                            </el-col>
+                        </el-form-item>
+
+                        <el-form-item label="设置邮箱" prop="userEmail" style="margin: 20px;">
+                            <el-col :span="24" align="center">
+                                <el-input v-model="user.userEmail" placeholder="请输入邮箱"></el-input>
+                            </el-col>
+                        </el-form-item>
+                        <el-form-item label="选择性别" prop="userGender" style="margin: 20px;">
+                            <el-col :span="24" align="center">
+                                <el-radio-group v-model="user.userGender">
+                                    <el-radio label="男"></el-radio>
+                                    <el-radio label="女"></el-radio>
+                                </el-radio-group>
+                            </el-col>
+                        </el-form-item>
+                        <el-form-item label="选择生日" prop="userBirth" style="margin: 20px;">
+                            <el-col :span="24" align="center">
+                                <el-date-picker type="date"  value-format="yyyy-MM-dd" placeholder="选择日期" v-model="user.userBirth"></el-date-picker>
+                            </el-col>
+                        </el-form-item>
+                        <el-form-item label="个人简介" prop="userResume" style="margin: 20px;">
+                            <el-col :span="24" align="center">
+                                <el-input type="textarea" v-model="user.userResume" placeholder="请输入简介"></el-input>
+                            </el-col>
+                        </el-form-item>
+
+                        <el-form-item label-width="0px">
+                            <el-col align="center">
+                                <el-button type="success" size="mini" icon="el-icon-user-solid" @click="register('userForm')">注册</el-button>
+                                <el-button type="primary" size="mini" icon="el-icon-user-solid" @click="back">返回</el-button>
+                            </el-col>
+                        </el-form-item>
+                    </el-form>
+                </el-col>
+                <el-col :span="8">&nbsp;</el-col>
+            </el-row>
+        </el-main>
+    </el-container>
+</div>
+
+</body>
+
+<script>
+    //创建vue对象
+    new Vue({
+        el:"#register",//绑定html元素
+        data: {
+            rules: {
+                userName: [
+                    { required: true, message: '请输入用户名', trigger: 'blur' },
+                    { min: 5,  message: '长度至少为5个字符', trigger: 'blur' }
+                ],
+                userPwd: [
+                    { required: true, message: '请输入密码', trigger: 'blur' },
+                    { min: 6, max: 18, message: '长度在 6 到 18 个字符之间', trigger: 'blur' }
+
+                ],
+                userEmail: [
+                    { required: true, message: '请输入邮箱', trigger: 'blur' },
+                    {
+                        validator: (rule, value, callback) => {
+                            const reg = /^[a-zA-Z0-9_-]+@[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)+$/;
+                            if (reg.test(value)) {
+                                const domain = value.split('@')[1];
+                                if (domain === 'qq.com') {
+                                    callback();
+                                } else {
+                                    callback(new Error('请输入QQ邮箱'));
+                                }
+                            } else {
+                                callback(new Error('请输入有效的邮箱地址'));
+                            }
+                        },
+                        trigger: 'blur'
+                    }
+                ],
+                userGender: [
+                    { required: true, message: '请至少选择选择一个性别', trigger: 'change' }
+                ],
+                userBirth: [
+                    { required: true, message: '请选择生日', trigger: 'change' }
+                ],
+                userResume: [
+                    { required: true, message: '请输入个人简介', trigger: 'blur' }
+                ]
+            },
+            user: {
+                userName: "",
+                userPwd: "",
+                userEmail: "",
+                userGender: "",
+                userBirth: "",
+                userResume: ""
+            }
+        },
+        methods:{
+            register:function (formName) {//添加函数
+                //记录vue对象
+                this.$refs[formName].validate((valid) => {
+                    if (valid) {
+
+                        const self = this;
+                        //发送ajax请求服务端
+                        $.ajax({
+                            url:"/user/register",//请求地址
+                            type:"get",//请求类型
+                            data:this.user,//请求参数
+                            success:function (data) {//请求响应回调函数
+                                if(data.code==500){
+                                    self.$message(data.msg);
+                                }else{
+                                    self.$message("成功");
+                                    //跳转到 listStudent页面
+                                    setTimeout(function() {
+                                        window.location.href="/html/login.html"; //跳转到系统主页
+                                    }, 200);
+                                }
+
+                            }
+                        })
+
+                    } else {
+                        console.log('error submit!!');
+                        return false;
+                    }
+                });
+
+
+            },
+            back:function () {
+                window.location.href="/html/login.html";
+            }
+        },
+    })
+
+</script>
+<style>
+    html,body{
+        margin: 0;/*设置html,body元素的内边距为0，默认是15px*/
+        height: 100%;
+        background-image:url(../img/bj.jpg);
+    }
+
+    .test{
+        height: 100%;
+        background-image:url(../img/bj.jpg);
+    }
+
+</style>
+</html>

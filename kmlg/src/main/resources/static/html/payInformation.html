@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>一卡通信息查询</title>
+    <!-- 引入样式 -->
+    <!-- 引入样式 -->
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+    <script src="/js/vue.js"></script>
+    <script src="/js/jquery-3.1.1.min.js"></script>
+    <!-- 引入组件库 -->
+    <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+</head>
+<body>
+<div id="list">
+    <h1 align="center">费用信息查询</h1>
+    <el-row>
+        <el-col :span="12" :offset="6">
+            <el-form :inline="true" class="demo-form-inline">
+                <el-form-item label="查询订单">
+                    <el-select v-model="pay.payType" placeholder="请选择商品名称">
+                        <el-option label="一卡通支付服务" value="一卡通支付服务"></el-option>
+                        <el-option label="水电费提交服务" value="水电费提交服务"></el-option>
+                    </el-select>
+                </el-form-item>
+                <el-form-item>
+                    <el-button type="success" size="mini" @click="loadData">查询</el-button>
+                    <el-button type="success" size="mini" @click="reset">重置</el-button>
+                </el-form-item>
+            </el-form>
+        </el-col>
+    </el-row>
+    <el-row>
+        <el-col :span="16" :offset="4">
+            <el-table :data="list" style="width: 100%">
+                <el-table-column prop="payId" label="订单序号"></el-table-column>
+                <el-table-column prop="payType" label="支付类型"></el-table-column>
+                <el-table-column prop="payBody" label="备注" width="300px"></el-table-column>
+                <el-table-column prop="payMoney" label="余额"></el-table-column>
+                <el-table-column label="操作">
+                    <template slot-scope="scope">
+                        <el-button type="primary" size="mini" @click="edit(scope.row)">缴费</el-button>
+                        <el-button type="danger" size="mini" @click="del(scope.row.payId)">删除</el-button>
+                    </template>
+                </el-table-column>
+            </el-table>
+        </el-col>
+    </el-row>
+</div>
+</body>
+<script>
+    new Vue({
+        el: "#list",
+        data: {
+            list: [],
+            pay: {
+                payId: "",
+                payType:""
+            }
+        },
+        methods: {
+            edit: function (row) {
+                localStorage.setItem("pay", JSON.stringify(row));
+                window.location.href = "/html/pay.html";
+            },
+            reset: function () {
+                this.pay.payType = "";
+                this.loadData();
+            },
+            loadData: function () {
+                const self = this;
+                $.ajax({
+                    url: "/pay/update",
+                    type: "get",
+                    data: this.pay,
+                    success: function (data) {
+                        if (data.code === 200) {
+                            self.list = data.data;
+                            self.$message("成功！");
+                        } else {
+                            self.list = [];
+                            self.$message(data.msg);
+                        }
+                    }
+                });
+            },
+            del:function(Id){//删除
+                const self = this;
+                //创建确认框
+                self.$confirm("你确定要删除吗?").then(function () {
+                    //发送ajax请求
+                    $.ajax({
+                        url:"/pay/del",
+                        type:"get",
+                        data:{"Id":Id},
+                        success:function (data) {
+                            self.$message(data.msg);
+                            if(data.code==200){
+                                //刷新数据
+                                self.loadData();
+                            }
+                        }
+                    })
+                })
+            },
+        },
+        mounted() {
+            this.loadData();
+        }
+    });
+</script>
+</html>

@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <!-- 引入样式 -->
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+    <script src="/js/vue.js"></script>
+    <script src="/js/jquery-3.1.1.min.js"></script>
+    <!-- 引入组件库 -->
+    <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+</head>
+<body>
+<div id="register">
+    <el-container class="test">
+        <br><br>
+        <el-main>
+            <el-row>
+                <el-col :span="8">&nbsp;</el-col>
+                <el-col :span="8">
+                    <el-form :data="user" style="background-color: white;border-radius: 1%;min-width: 500px; opacity: 0.9;padding-left: 10px;padding-right: 10px;">
+                        <br>
+                        <h1 align="center">个人资料</h1>
+                        <el-form-item label="用户名" style="margin: 20px;">
+                            <el-col :span="24" align="center">
+                                <el-input prop="userName"  v-model="user.userName" placeholder="请输入用户名"></el-input>
+                            </el-col>
+                        </el-form-item>
+                        <el-form-item label="设置密码" style="margin: 20px;">
+                            <el-col :span="24" align="center">
+                                <el-input prop="userPwd"  v-model="user.userPwd" placeholder="请输入密码"></el-input>
+                            </el-col>
+                        </el-form-item>
+                        <el-form-item label="设置邮箱" style="margin: 20px;">
+                            <el-col :span="24" align="center">
+                                <el-input prop="userEmail"  v-model="user.userEmail" placeholder="请输入邮箱"></el-input>
+                            </el-col>
+                        </el-form-item>
+                        <el-form-item label="选择性别" style="margin: 20px;">
+                            <el-col :span="24" align="center">
+                                <el-radio-group prop="userGender"  v-model="user.userGender">
+                                    <el-radio label="男"></el-radio>
+                                    <el-radio label="女"></el-radio>
+                                </el-radio-group>
+                            </el-col>
+                        </el-form-item>
+                        <el-form-item label="选择生日" prop="userBirth" style="margin: 20px;" >
+                            <el-col :span="24" align="center">
+                                <el-date-picker type="date" value-format="yyyy-MM-dd"  v-model="user.userBirth" placeholder="选择日期"></el-date-picker>
+                            </el-col>
+                        </el-form-item>
+                        <el-form-item label="个人简介" style="margin: 20px;">
+                            <el-col :span="24" align="center">
+                                <el-input type="textarea" prop="userResume" v-model="user.userResume" placeholder="请输入简介"></el-input>
+                            </el-col>
+                        </el-form-item>
+
+                        <el-form-item label-width="0px">
+                            <el-col align="center">
+                                <el-button type="success" icon="el-icon-user-solid" @click="update">修改</el-button>
+                            </el-col>
+                        </el-form-item>
+                    </el-form>
+                </el-col>
+                <el-col :span="8">&nbsp;</el-col>
+            </el-row>
+        </el-main>
+    </el-container>
+</div>
+
+</body>
+
+<script>
+    //创建vue对象
+    //创建vue对象
+    var app = new Vue({
+        el:"#register",//绑定html元素
+        data: {
+            user: {
+                userName: "",
+                userPwd: "",
+                userEmail: "",
+                userGender: "",
+                userBirth: "",
+                userResume: ""
+            }
+        },
+        methods:{ //定义vue函数
+            update:function () {//添加函数
+                //记录vue对象
+                const self = this;
+                //发送ajax请求服务端
+                $.ajax({
+                    url:"/user/update",//请求地址
+                    type:"get",//请求类型
+                    data:this.user,//请求参数
+                    success:function (data) {//请求响应回调函数
+                        if(data.code==500){
+                            self.$message(data.msg);
+                        }else{
+                            self.$message("成功");
+                            //跳转到 listStudent页面
+                        }
+
+                    }
+                })
+
+            },
+
+            refresh:function () {//添加函数
+                //记录vue对象
+                const self = this;
+                //发送ajax请求服务端
+                $.ajax({
+                    url:"/user/select",//请求地址
+                    type:"get",//请求类型
+                    data:this.user,//请求参数
+                    success:function (data) {//请求响应回调函数
+                        if(data.code==500){
+                            self.$message(data.msg);
+                        }else{
+                            self.$message("成功");
+                            app.user = data.data;
+                            //跳转到 listStudent页面
+                        }
+                    }
+                })
+            }
+        },
+        mounted(){//挂载函数，等同于onload事件
+            //调用loadData函数
+            this.refresh();
+        }
+    })
+
+
+</script>
+<style>
+    html,body{
+        margin: 0;/*设置html,body元素的内边距为0，默认是15px*/
+        height: 100%;
+    }
+
+    .test{
+        height: 100%;
+    }
+    .login-one{
+        background-color:white;
+        background-size: cover;
+        background-repeat:no-repeat;
+        overflow:hidden;
+        height: 100%;
+    }
+
+</style>
+</html>

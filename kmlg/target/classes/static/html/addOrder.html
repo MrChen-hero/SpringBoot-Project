@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <!-- 引入样式 -->
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+    <script src="/js/vue.js"></script>
+    <script src="/js/jquery-3.1.1.min.js"></script>
+    <!-- 引入组件库 -->
+    <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+</head>
+<body>
+<div id="login">
+    <el-container class="test">
+        <el-header></el-header>
+        <el-main>
+            <br><br>
+            <el-row>
+                <el-col :span="8">&nbsp;</el-col>
+                <el-col :span="8">
+                    <el-form label-width="80px" style="background-color: white;border-radius: 1%;min-width: 300px">
+                        <br>
+                        <h1 align="center">订单新增</h1>
+                        <el-form-item label="订单类型:">
+                            <el-col :span="20">
+                                <el-select v-model="pay.payType" placeholder="请选择商品名称">
+                                    <el-option label="一卡通支付服务" value="一卡通支付服务"></el-option>
+                                    <el-option label="水电费提交服务" value="水电费提交服务"></el-option>
+                                </el-select>
+                            </el-col>
+                        </el-form-item>
+
+                        <el-form-item label="订单金额:">
+                            <el-col :span="20">
+                                <el-input v-model="pay.payMoney" placeholder="请输入金额"></el-input>
+                            </el-col>
+                        </el-form-item>
+
+                        <el-form-item label="订单备注:">
+                            <el-col :span="20">
+                                <el-input v-model="pay.payBody" placeholder="请输入备注"></el-input>
+                            </el-col>
+                        </el-form-item>
+
+                        <el-form-item label-width="0px">
+                            <el-col align="center">
+                                <el-button type="success" icon="el-icon-user-solid" @click="add">新增</el-button>
+                            </el-col>
+                        </el-form-item>
+                    </el-form>
+                </el-col>
+                <el-col :span="8">&nbsp;</el-col>
+            </el-row>
+
+
+        </el-main>
+    </el-container>
+</div>
+
+</body>
+
+<script>
+    //创建vue对象
+    new Vue({
+        el:"#login",//绑定html元素
+        data: {
+            pay: {
+                payType:"",
+                payMoney:"",
+                payBody:""
+            }
+        },
+        methods:{ //定义vue函数
+            add:function () {//添加函数
+                //记录vue对象
+                const self = this;
+                //发送ajax请求服务端
+                $.ajax({
+                    url:"/pay/add",//请求地址
+                    type:"get",//请求类型
+                    data:this.pay,//请求参数
+                    success:function (data) {//请求响应回调函数
+                        if(data.code==500){
+                            self.$message(data.msg);
+                        }else{
+                            self.$message("成功");
+                            //跳转到 listStudent页面
+                            window.location.href="/html/payInformation.html";
+                        }
+
+                    }
+                })
+
+            }
+        }
+
+    })
+
+</script>
+<style>
+    html,body{
+        margin: 0;/*设置html,body元素的内边距为0，默认是15px*/
+        height: 100%;
+    }
+    .el-header {
+
+    }
+    .el-main {
+
+    }
+    .test{
+        height: 100%
+    }
+    .login-one{
+        background-color:#1c77ac;
+        background-image:url(../img/bj.jpg);
+        background-size: cover;
+        background-repeat:no-repeat;
+        overflow:hidden;
+        height: 100%;
+    }
+
+</style>
+</html>
